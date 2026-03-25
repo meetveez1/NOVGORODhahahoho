@@ -13,7 +13,7 @@
 | Интерфейс | Telegram Bot API |
 | Векторная БД | [Supabase](https://supabase.com/) + расширение `pgvector` |
 | Эмбеддинги | [mxbai-embed-large-v1](https://huggingface.co/mixedbread-ai/mxbai-embed-large-v1) (HuggingFace Inference API) |
-| LLM для ответов | [OpenRouter](https://openrouter.ai) (модель по выбору) |
+| LLM для ответов | [OpenRouter](https://openrouter.ai) (модель по выбору) [у нас](https://openrouter.ai/nvidia/nemotron-3-super-120b-a12b:free/uptime)  |
 
 ---
 
@@ -106,7 +106,6 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_or_create_book TO anon, authenticated, service_role;
-NOTIFY pgrst, 'reload schema';
 ```
 
 ### 3. Импорт воркфлоу в n8n

@@ -19,8 +19,8 @@
       "webhookId": "book-search-bot",
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -66,8 +66,8 @@
       "webhookId": "05809afa-83eb-4511-919c-b90f94a19f56",
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -124,7 +124,7 @@
                   {
                     "id": "r-help",
                     "leftValue": "={{ $json.message.text }}",
-                    "rightValue": "/help",
+                    "rightValue": "/start",
                     "operator": {
                       "type": "string",
                       "operation": "equals"
@@ -134,7 +134,7 @@
                 "combinator": "and"
               },
               "renameOutput": true,
-              "outputKey": "/help"
+              "outputKey": "/start"
             },
             {
               "conditions": {
@@ -225,7 +225,7 @@
       "parameters": {
         "operation": "sendAndWait",
         "chatId": "={{ $json.message.chat.id }}",
-        "message": "Загрузить книгу",
+        "message": "=📥 Загрузка новой книги\n\n⏳ После отправки мне понадобится немного времени, чтобы «прочитать» и проиндексировать содержание. Я напишу вам, как закончу работу\n",
         "responseType": "customForm",
         "formFields": {
           "values": [
@@ -252,8 +252,8 @@
       "webhookId": "1f7cad42-f341-4bab-ac0b-ed1a821c69d1",
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -350,7 +350,7 @@
       "parameters": {
         "operation": "sendAndWait",
         "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
-        "message": "Напишите интересующий вас вопрос в специальную форму\nВ вопросе укажите: Название книги, главу и том (по желанию и если есть)\nНомера пишите цифрами, чтобы выдавало корректный ответ",
+        "message": "🔍 ПОИСК ПО СОДЕРЖАНИЮ\nПожалуйста, напишите ваш вопрос в поле ввода. Чтобы я нашел ответ максимально точно, укажите в сообщении:\n📖 Название книги\n📑 Номер главы (цифрами: 1, 2, 3...)\n📚 Номер тома (если он есть)\n💡 ПРИМЕРЫ ЗАПРОСОВ:\n— Что случилось в 4 главе Пиковой дамы?\n— О чем говорится в 1 томе 5 главе Войны и мира?\n— Кто пришел к Германну в главе 3?\nИспользуйте обычные цифры вместо слов (5 вместо «пятая»), это поможет мне мгновенно найти нужный фрагмент!",
         "responseType": "freeText",
         "options": {
           "messageButtonLabel": "Написать",
@@ -369,8 +369,8 @@
       "webhookId": "c7ab7954-b154-4e47-b044-fd215a05058e",
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -454,16 +454,17 @@
     {
       "parameters": {
         "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
-        "text": "Отправлено",
+        "text": "=<b>✅ Успешно отправлено!</b>\n\nКнига <b>«{{ $('Нарезать на фрагменты и выделить главы').item.json.metadata.book }}»</b> обработана. \n_________________________________________\n\nИспользуйте команду 🔍 <b>/search</b>, чтобы начать поиск.\n",
         "additionalFields": {
-          "appendAttribution": false
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -96,
-        496
+        -160,
+        400
       ],
       "id": "c5132b1a-106d-43a0-bd84-89a77ea4ac7f",
       "name": "Send a text message",
@@ -471,8 +472,8 @@
       "executeOnce": true,
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -495,8 +496,8 @@
       "webhookId": "4a4b1a8b-4995-4363-a094-108d0dec8097",
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -515,10 +516,11 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $('Разобрать сообщение1').item.json.chatId }}",
-        "text": "📚 *Умный поиск по книгам*\n\nЯ ищу фрагменты в книгах и отвечаю на вопросы по их содержанию.\n\n*Команды:*\n🔍 /search — найти фрагменты текста\n💬 /ask — задать вопрос по книгам\n📖 /books — список загруженных книг\n\n*Загрузка книги:*\n📄 Отправь .txt файл прямо в чат\n\n*Примеры:*\n`/search первый бал Наташи Ростовой`\n`/ask Почему Раскольников решился на убийство?`",
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "=<b>📚 Умный поиск по книгам</b>\n\nЯ — ваш персональный ассистент по чтению. Помогу найти ответ на любой вопрос по содержанию загруженных произведений.\n\n<b>🛠 Доступные команды:</b>\n\n🔍 <b>/search</b> — задать вопрос по тексту или найти фрагмент.\n📚 <b>/list_books</b> — посмотреть список всех загруженных книг.\n\n<b>📥 Загрузка новой книги:</b>\n\nЧтобы добавить книгу в базу, просто напишите /upload и отправьте файл в формате <b>.txt</b> . ",
         "additionalFields": {
-          "parse_mode": "Markdown"
+          "appendAttribution": false,
+          "parse_mode": "HTML"
         }
       },
       "id": "825ae08e-99a4-41cf-9e56-7d2ddd83a080",
@@ -532,8 +534,8 @@
       "webhookId": "496df682-ca3e-443f-8179-3302ed41490b",
       "credentials": {
         "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "BojlEHia3tCnY5mY",
+          "name": "Telegram account 3"
         }
       }
     },
@@ -795,12 +797,12 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "f65f0cbf-3655-40c8-81a8-1e8e5229bcee",
+  "versionId": "05a2745a-b72f-40ac-a549-424b4cf731f3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "ef54d6bc21c36c3d24b246e111c5bcc9415a8aeeee932293aeeb5e99a6fc8a9e"

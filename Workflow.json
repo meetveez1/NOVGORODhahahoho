@@ -3,238 +3,20 @@
   "nodes": [
     {
       "parameters": {
-        "method": "POST",
-        "url": "=https://jpcsgzcswglbihtkmgeu.supabase.co/rest/v1/rpc/get_or_create_book",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "prefer",
-              "value": "resolution=merge-duplicates"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"p_file_name\": \"={{ $('Send message and wait for response2').item.json.data['Загрузите книгу'][0].filename }}\",\n  \"p_title\": \"={{ $('Send message and wait for response2').item.json.data['Загрузите книгу'][0].filename.replace('.txt', '') }}\",\n  \"p_size_bytes\": {{ $('Нарезать на фрагменты2').item.json.sizeBytes }},\n  \"p_chunk_count\": {{ $('Нарезать на фрагменты2').item.json.totalChunks }}\n}",
-        "options": {}
-      },
-      "id": "3729048e-9275-4afe-9911-a4613815f2a2",
-      "name": "Создать запись книги в Supabase",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -560,
-        240
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "3qksiIScmLcmiycb",
-          "name": "Header Auth account 4"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://router.huggingface.co/hf-inference/models/mixedbread-ai/mxbai-embed-large-v1/pipeline/feature-extraction",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBearerAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Wait-For-Model",
-              "value": "true"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"inputs\": {{ JSON.stringify($('Split Out2').item.json.content) }},\n  \"options\": {\n    \"wait_for_model\": true\n  }\n}",
-        "options": {
-          "batching": {
-            "batch": {
-              "batchSize": 1,
-              "batchInterval": 1500
-            }
-          },
-          "timeout": 40000
-        }
-      },
-      "id": "b8c381b9-53b2-46bc-9b94-a3af24d3ce81",
-      "name": "Embedding чанка → HF",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -224,
-        208
-      ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 5000,
-      "credentials": {
-        "httpBearerAuth": {
-          "id": "r50PwBzLsdWxeh47",
-          "name": "Bearer Auth account 5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "=https://jpcsgzcswglbihtkmgeu.supabase.co/rest/v1/chunks",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Prefer",
-              "value": "return=minimal"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"book_id\": {{ $('Создать запись книги в Supabase').item.json.id }},\n  \"book_name\": \"={{ $('Нарезать на фрагменты2').item.json.fileName }}\",\n  \"content\": ,\n  \"embedding\": {{ $json.embedding }},\n  \"chapter\": \"={{ $('Split Out2').item.json.chapter || 'Начало' }}\",\n  \"line_start\": {{ $('Split Out2').item.json.lineStart || 0 }},\n  \"line_end\": {{ $('Split Out2').item.json.lineEnd || 0 }}\n}",
-        "options": {}
-      },
-      "id": "8e149ca6-f299-4742-ab05-4710351421b8",
-      "name": "Вставить чанк в Supabase",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        400,
-        560
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "3qksiIScmLcmiycb",
-          "name": "Header Auth account 4"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://router.huggingface.co/hf-inference/models/mixedbread-ai/mxbai-embed-large-v1/pipeline/feature-extraction",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpBearerAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-Wait-For-Model",
-              "value": "true"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"inputs\": {{ JSON.stringify($('Разобрать сообщение1').item.json.query) }},\n  \"options\": { \"wait_for_model\": true }\n}",
-        "options": {
-          "timeout": 30000
-        }
-      },
-      "id": "c2a25333-1565-4f02-980f-e8c7d104424a",
-      "name": "Embedding запроса → HF",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -816,
-        1248
-      ],
-      "credentials": {
-        "httpBearerAuth": {
-          "id": "r50PwBzLsdWxeh47",
-          "name": "Bearer Auth account 5"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "// ИСПРАВЛЕНО: HF возвращает float[] или float[][] — нормализуем\nconst raw = $input.first().json;\nlet embedding;\n\nif (Array.isArray(raw) && Array.isArray(raw[0])) {\n  embedding = raw[0];\n} else if (Array.isArray(raw)) {\n  embedding = raw;\n} else {\n  throw new Error('Неожиданный формат ответа HF: ' + JSON.stringify(raw).slice(0,200));\n}\n\nreturn [{ json: { embedding } }];"
-      },
-      "id": "73f2a281-8bf4-4413-907d-da794c75c35f",
-      "name": "Распаковать эмбеддинг запроса",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -592,
-        1248
-      ]
-    },
-    {
-      "parameters": {
         "updates": [
           "message"
         ],
         "additionalFields": {}
       },
-      "id": "8e81499a-8c26-4554-93be-839d89439b55",
+      "id": "8245be58-08d1-4633-b417-bd4bd001f017",
       "name": "Telegram Trigger1",
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.1,
       "position": [
-        -2144,
-        1008
+        -2384,
+        1168
       ],
       "webhookId": "book-search-bot",
-      "credentials": {
-        "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $('Разобрать сообщение1').item.json.chatId }}",
-        "text": "📚 *Умный поиск по книгам*\n\nЯ ищу фрагменты в книгах и отвечаю на вопросы по их содержанию.\n\n*Команды:*\n🔍 /search — найти фрагменты текста\n💬 /ask — задать вопрос по книгам\n📖 /books — список загруженных книг\n\n*Загрузка книги:*\n📄 Отправь .txt файл прямо в чат\n\n*Примеры:*\n`/search первый бал Наташи Ростовой`\n`/ask Почему Раскольников решился на убийство?`",
-        "additionalFields": {
-          "parse_mode": "Markdown"
-        }
-      },
-      "id": "77f2160c-7ea4-4a3a-80a8-249f342cca82",
-      "name": "Отправить справку1",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        -1424,
-        448
-      ],
-      "webhookId": "496df682-ca3e-443f-8179-3302ed41490b",
-      "credentials": {
-        "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
-        "text": "=Сообщение отправлено!!!",
-        "additionalFields": {
-          "parse_mode": "Markdown"
-        }
-      },
-      "id": "7146b78f-6fdc-4659-aec7-124652d07358",
-      "name": "Книга загружена1",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        624,
-        544
-      ],
-      "webhookId": "80120882-9b73-4336-86f1-8c2ccf8f3761",
       "credentials": {
         "telegramApi": {
           "id": "CZXftFUVcPFhvuZ8",
@@ -248,15 +30,15 @@
         "tableId": "books",
         "returnAll": true,
         "filterType": "string",
-        "filterString": "select=file_name,chunk_count,size_bytes&order=uploaded_at.desc"
+        "filterString": "select=title"
       },
-      "id": "e60a8e14-f22a-4c7d-8582-f37af9bf90e0",
+      "id": "ef8a7e91-f6ef-4791-a20c-ec63bcd1b5f1",
       "name": "Список книг → Supabase1",
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -1360,
-        1056
+        -1760,
+        1168
       ],
       "credentials": {
         "supabaseApi": {
@@ -267,32 +49,19 @@
     },
     {
       "parameters": {
-        "jsCode": "const rows   = $input.all().map(i => i.json);\nconst chatId = $('Разобрать сообщение1').item.json.chatId;\nlet text;\nif (!rows.length || !rows[0].file_name) {\n  text = '📚 Книги ещё не загружены.\\n\\nОтправь .txt файл прямо в чат, чтобы добавить книгу.';\n} else {\n  const list = rows.map((r, i) =>\n    `${i+1}. 📗 *${r.file_name}*\\n    ${r.chunk_count} фрагм. · ${Math.round(r.size_bytes/1024)} КБ`\n  ).join('\\n\\n');\n  text = `📚 *Загруженные книги (${rows.length}):*\\n\\n${list}\\n\\nЧтобы найти — /search запрос`;\n}\nreturn [{ json: { chatId, text } }];"
-      },
-      "id": "8f80b735-54f3-495a-9423-263d919c4d56",
-      "name": "Форматировать список книг1",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1088,
-        944
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $json.chatId }}",
-        "text": "={{ $json.text }}",
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "=Список книг на данный момент: {{ $json.title.join(', ') }}",
         "additionalFields": {
-          "parse_mode": "Markdown"
+          "appendAttribution": false
         }
       },
-      "id": "105e2b81-553c-478b-85dc-ad1a4e5bb5ad",
+      "id": "fb7ed9bd-36c4-49d3-8b15-ad782b63b258",
       "name": "Отправить список книг1",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -704,
-        880
+        -1200,
+        1120
       ],
       "webhookId": "05809afa-83eb-4511-919c-b90f94a19f56",
       "credentials": {
@@ -304,269 +73,38 @@
     },
     {
       "parameters": {
-        "jsCode": "const query  = $('Разобрать сообщение1').item.json.query;\nconst mode   = $('Разобрать сообщение1').item.json.mode;\nconst chatId = $('Разобрать сообщение1').item.json.chatId;\n\nif (!query) {\n  const hint = mode === 'qa'\n    ? 'Напиши вопрос после команды.\\nПример: /ask Почему Раскольников убил старуху?'\n    : 'Напиши запрос после команды.\\nПример: /search первый бал Наташи Ростовой';\n  return [{ json: { chatId, emptyQuery: true, hint } }];\n}\nreturn [{ json: { chatId, mode, query, emptyQuery: false } }];"
-      },
-      "id": "62743c1d-3769-4e95-a942-c1632449e9c1",
-      "name": "Проверить запрос1",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1472,
-        1168
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true
-          },
-          "conditions": [
-            {
-              "id": "empty-q",
-              "leftValue": "={{ $json.emptyQuery }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "true"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "790701e0-b32f-4cda-9029-3568faadfabd",
-      "name": "Запрос пустой?1",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        -1264,
-        1168
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $json.chatId }}",
-        "text": "=⚠️ {{ $json.hint }}",
-        "additionalFields": {}
-      },
-      "id": "87f785e9-a496-4b69-8788-dfa9f4148b82",
-      "name": "Подсказка по команде1",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        -752,
-        1088
-      ],
-      "webhookId": "560302ae-c0a5-4198-b90e-4d5a3f1f915a",
-      "credentials": {
-        "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $('Разобрать сообщение1').item.json.chatId }}",
-        "text": "=🔍 Ищу по запросу: _{{ $('Разобрать сообщение1').item.json.query }}_",
-        "additionalFields": {
-          "parse_mode": "Markdown"
-        }
-      },
-      "id": "f95c9be1-69a8-4ced-87e9-06eb7132fdc9",
-      "name": "Сообщение: ищу1",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        -1040,
-        1248
-      ],
-      "webhookId": "4a4b1a8b-4995-4363-a094-108d0dec8097",
-      "credentials": {
-        "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "={{ $credentials.supabaseApi.host }}/rest/v1/rpc/search_by_embedding",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "apikey",
-              "value": "={{ $credentials.supabaseApi.serviceRole }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"query_embedding\": {{ JSON.stringify($json.embedding) }},\n  \"top_k\": 5\n}",
-        "options": {}
-      },
-      "id": "45e4d16e-f583-467d-80be-d5c6dbbd2164",
-      "name": "Векторный поиск → Supabase RPC1",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        -384,
-        1248
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "id": "3qksiIScmLcmiycb",
-          "name": "Header Auth account 4"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const rows   = $input.first().json;\nconst query  = $('Разобрать сообщение1').item.json.query;\nconst mode   = $('Разобрать сообщение1').item.json.mode;\nconst chatId = $('Разобрать сообщение1').item.json.chatId;\n\nconst results = Array.isArray(rows) ? rows : [];\n\nif (!results.length) {\n  return [{ json: { chatId, noResults: true, query, mode } }];\n}\n\nconst context = results.map((r, i) => [\n  `[Фрагмент ${i+1}] | Сходство: ${(r.similarity * 100).toFixed(0)}%`,\n  `Книга: «${r.book_name}» | Раздел: ${r.chapter} | Строки: ${r.line_start}–${r.line_end}`,\n  '',\n  r.content\n].join('\\n')).join('\\n\\n---\\n\\n');\n\nconst systemPrompt = mode === 'qa'\n  ? 'Ты помощник, который отвечает на вопросы СТРОГО на основе предоставленных фрагментов книг. Давай подробный ответ. В конце обязательно приведи 2-3 прямые цитаты из текста в кавычках с указанием книги. Если ответа нет в предоставленных фрагментах — честно сообщи об этом. Отвечай на русском языке.'\n  : 'Ты помощник для поиска по книгам. Из предоставленных фрагментов выбери 3-5 наиболее подходящих под запрос. Для каждого: укажи книгу и место в тексте, приведи краткую цитату, объясни 1 предложением почему фрагмент подходит. Если ни один фрагмент не подходит под запрос — честно скажи об этом. Отвечай на русском языке.';\n\nconst userPrompt = `${mode === 'qa' ? 'Вопрос' : 'Запрос'}: «${query}»\\n\\nФрагменты из книг:\\n\\n${context}`;\n\nreturn [{ json: { chatId, mode, query, systemPrompt, userPrompt, noResults: false } }];"
-      },
-      "id": "c879b855-3e1c-4b18-babf-df8609ece795",
-      "name": "Подготовить контекст для AI1",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -160,
-        1248
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": true
-          },
-          "conditions": [
-            {
-              "id": "no-res",
-              "leftValue": "={{ $json.noResults }}",
-              "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "true"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "e934b75d-827c-43de-bb90-b201b0a5a22e",
-      "name": "Есть результаты?1",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [
-        64,
-        1248
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $json.chatId }}",
-        "text": "=📭 По запросу *{{ $json.query }}* ничего не найдено в загруженных книгах.\n\nПроверь список книг: /books\nЗагрузи книгу — отправь .txt файл",
-        "additionalFields": {
-          "parse_mode": "Markdown"
-        }
-      },
-      "id": "071e6778-2483-4cc0-94df-a9c65c1afeea",
-      "name": "Нет результатов1",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        288,
-        1168
-      ],
-      "webhookId": "16b82ae7-69ba-45b2-8be8-8ac709028685",
-      "credentials": {
-        "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
-        }
-      }
-    },
-    {
-      "parameters": {
         "promptType": "define",
-        "text": "={{ $json.userPrompt }}",
+        "text": "={{ $json.query }} тараса бульбы",
         "options": {
-          "systemMessage": "={{ $json.systemPrompt }}"
+          "systemMessage": "=Я пользователь, который хочет узнать вопрос по определенной книге с возможным учетом главы, если понадобится. \nПо запросу на поиск фрагмента текста (например, «Найди, где говорится про...») ты должен выдавать несколько (например, 3–5) самых подходящих фрагментов текста. Для каждого фрагмента должна быть выведена информация, откуда он взят (книга и, по возможности, место в тексте — глава, страница и т.п., если есть). Если в загруженных текстах нет нужного фрагмента, система должна уметь честно сообщить об этом пользователю. По запросу с вопросом (например: «Что произошло с Наташей и Пьером в эпилоге романа \"Война и мир\"?») ты должен дать ответ, опираясь на\nзагруженные в тебя тексты. Чтобы найти название книги из списка ищи в metadata book и там есть название в chapter глава книги. Название может быть на русском, английском и других языках, с разными символами, значком расширения тхт. Ты должен его прочитать, понять к какой это книге относится и дальше строить ответ. Если задается вопрос про конкретную главу - ищи именно в этой главе и только\nДля каждого ответа должен быть выведен список цитат из исходного\nтекста, на которые система опиралась при ответе. \nЕсли в загруженных текстах нет ответа на точный вопрос (нет спрашевоемого имени, события, главы, города или вообще вопрос по незагруженной книге, вопрос по фильму, событию, не относяшемогося ни к чему) ты говоришь пользователю \"Извините, ничего не было найдено по вашему вопросу, подкорректируйте вопрос\". Попробуй не вставлять символы и слова, не относящиеся к ответу, типа text, metadata, line и тд, ведь это относится больше к самой работе с текстом, а не к ответу. Формат текста должен быть красиво составлен для глаза, то-есть нет такого, что два слова идут без пробела и тд. «ВАЖНО: При ответе пользователю НИКОГДА не выводи технические данные, ID, номера строк или JSON-объекты из метаданных (например, 【{\"id\":0...}】).\nТвоя задача — дать чистый человеческий ответ. Если хочешь сослаться на источник, просто напиши: (Источник: Глава 5). Весь остальной технический шум из контекста игнорируй и не показывай пользователю.». Попробуй еще сделать это используя поменьше токенов"
         }
       },
-      "id": "8bb36ee3-eda5-497f-a32c-a509216e97bc",
+      "id": "51a5dfd7-e565-4b59-b8fa-eda73642834f",
       "name": "AI Agent1",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.7,
       "position": [
-        288,
-        1328
+        -1232,
+        1520
       ]
     },
     {
       "parameters": {
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
         "options": {}
       },
-      "id": "5396f4dc-c9b9-443b-b0c6-0e3393479da6",
+      "id": "9406b9b3-4435-4868-b906-1dee3ee4b77a",
       "name": "OpenRouter Chat Model1",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        288,
-        1488
+        -1264,
+        1728
       ],
       "credentials": {
         "openRouterApi": {
-          "id": "I9CZyxwILyQpEOXf",
-          "name": "API LLM"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const answer = $input.first().json.output || $input.first().json.text || '';\nconst chatId = $('Подготовить контекст для AI1').item.json.chatId;\nconst mode   = $('Подготовить контекст для AI1').item.json.mode;\n\nconst prefix = mode === 'qa' ? '💬 *Ответ на вопрос:*\\n\\n' : '🔍 *Найденные фрагменты:*\\n\\n';\nlet text = prefix + answer;\n\nif (text.length > 3900) {\n  text = text.slice(0, 3900) + '\\n\\n_...ответ сокращён из-за ограничений Telegram_';\n}\n\nreturn [{ json: { chatId, text } }];"
-      },
-      "id": "6c6e2848-7b8c-46f4-a615-6103aa7a08a8",
-      "name": "Форматировать ответ1",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        496,
-        1328
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "={{ $json.chatId }}",
-        "text": "={{ $json.text }}",
-        "additionalFields": {
-          "parse_mode": "Markdown"
-        }
-      },
-      "id": "a57fff38-bc42-4570-a61d-7e8fb11437ea",
-      "name": "Отправить ответ1",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        720,
-        1328
-      ],
-      "webhookId": "18dfe07a-b345-4257-b117-b1c0a05df596",
-      "credentials": {
-        "telegramApi": {
-          "id": "CZXftFUVcPFhvuZ8",
-          "name": "Telegram account 2"
+          "id": "81j52o3Y6ZyPLCMj",
+          "name": "OpenRouter account"
         }
       }
     },
@@ -674,33 +212,20 @@
         },
         "options": {}
       },
-      "id": "03494185-9a20-4d24-9b9b-d49b9f0c2e0d",
+      "id": "11b5add6-fa29-456a-aa79-2fd3635932e2",
       "name": "Роутер1",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
       "position": [
-        -1744,
-        976
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// 1. Получаем текст и имя файла (пути из вашего рабочего кода)\nconst rawText = $input.first().json.text || \"\";\n// Обратите внимание: путь к имени файла должен точно соответствовать структуре в n8n\nconst fileName = $('Send message and wait for response2').first().json.data['Загрузите книгу'][0].filename || 'book.txt';\n\n// Проверка на пустоту\nif (!rawText || rawText.length < 10) {\n  throw new Error('Текст не найден. Убедитесь, что файл передан корректно.');\n}\n\nconst CHUNK_SIZE = 1200; \nconst OVERLAP = 200;\n// Регулярка для определения глав (улучшенная версия)\nconst chapterRe = /^\\s*(annotation|глава|часть|том|chapter|раздел)\\s*.*|^\\s*[IVXLCDM]+\\s*$/i;\n\nconst lines = rawText.split('\\n');\nlet currentChapter = \"Начало / Аннотация\";\nlet buffer = \"\";\nlet lineStart = 1;\nconst chunks = [];\n\nfor (let i = 0; i < lines.length; i++) {\n  const line = lines[i].trim();\n  if (!line) continue;\n\n  // Если встретили заголовок главы (ограничение длины строки, чтобы не принять обычный текст за главу)\n  if (chapterRe.test(line) && line.length < 60) {\n    if (buffer.trim().length > 5) {\n      chunks.push({ \n        chapter: currentChapter, \n        lineStart, \n        lineEnd: i, \n        content: buffer.trim() \n      });\n      buffer = \"\";\n    }\n    currentChapter = line;\n    lineStart = i + 1;\n  }\n\n  buffer += line + \" \";\n\n  // Нарезка по размеру (с учетом перекрытия OVERLAP)\n  if (buffer.length >= CHUNK_SIZE) {\n    chunks.push({ \n      chapter: currentChapter, \n      lineStart, \n      lineEnd: i + 1, \n      content: buffer.trim() \n    });\n    // Оставляем «хвост» для контекста следующего чанка\n    buffer = buffer.slice(-OVERLAP);\n    lineStart = i + 1;\n  }\n}\n\n// Добавляем последний кусок текста\nif (buffer.trim().length > 5) {\n  chunks.push({ \n    chapter: currentChapter, \n    lineStart, \n    lineEnd: lines.length, \n    content: buffer.trim() \n  });\n}\n\n// Формируем выходные данные как в первом примере\nreturn [{ \n  json: { \n    chunks: chunks, \n    fileName: fileName,\n    totalChunks: chunks.length,\n    sizeBytes: rawText.length\n  } \n}];"
-      },
-      "id": "ce583d24-f5b2-458e-a281-8f08e3d23906",
-      "name": "Нарезать на фрагменты2",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -1024,
-        672
+        -2128,
+        1136
       ]
     },
     {
       "parameters": {
         "operation": "sendAndWait",
         "chatId": "={{ $json.message.chat.id }}",
-        "message": "Загрузи книгу",
+        "message": "Загрузить книгу",
         "responseType": "customForm",
         "formFields": {
           "values": [
@@ -711,15 +236,18 @@
             }
           ]
         },
-        "options": {}
+        "options": {
+          "messageButtonLabel": "Загрузить",
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        -1376,
-        880
+        -1744,
+        896
       ],
-      "id": "adda634e-f36b-4892-aa6a-182f035f5eac",
+      "id": "51ee8d1c-c94d-4e8d-90ca-0db6d394a533",
       "name": "Send message and wait for response2",
       "webhookId": "1f7cad42-f341-4bab-ac0b-ed1a821c69d1",
       "credentials": {
@@ -733,75 +261,182 @@
       "parameters": {
         "operation": "text",
         "binaryPropertyName": "_______________",
-        "destinationKey": "text",
+        "destinationKey": "=text",
         "options": {}
       },
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1.1,
       "position": [
-        -1200,
-        784
+        -1472,
+        768
       ],
-      "id": "553fd3e1-a7c6-400b-ba84-6137fdb8ae7e",
+      "id": "c70ba207-6d21-45f0-b486-dc716806dab3",
       "name": "Extract from File1"
     },
     {
       "parameters": {
-        "fieldToSplitOut": "chunks",
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "chunks",
+          "mode": "list",
+          "cachedResultName": "chunks"
+        },
+        "embeddingBatchSize": 5,
         "options": {}
       },
-      "type": "n8n-nodes-base.splitOut",
-      "typeVersion": 1,
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
       "position": [
-        -880,
-        528
+        -752,
+        512
       ],
-      "id": "7e66bd66-04dd-4aa1-bd75-074563dce996",
-      "name": "Split Out2"
+      "id": "fe63bc30-0b3e-4fd4-8862-53c779affd76",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yZbFdNIlAizR3S9X",
+          "name": "Supabase account 2"
+        }
+      }
     },
     {
       "parameters": {
-        "aggregate": "aggregateAllItemData",
-        "destinationFieldName": "embedding",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "book",
+                "value": "={{ $('Send message and wait for response2').item.json.data['Загрузите книгу'][0].filename.replace('.txt', '') }}"
+              },
+              {
+                "name": "chapter",
+                "value": "={{ $('Нарезать на фрагменты и выделить главы').item.json.metadata.chapter }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        784
+      ],
+      "id": "abe36039-c89b-4bd1-a508-e518e0ccdaac",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "modelName": "mixedbread-ai/mxbai-embed-large-v1",
         "options": {}
       },
-      "type": "n8n-nodes-base.aggregate",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        240,
-        336
+        -816,
+        816
       ],
-      "id": "0c2c791d-9475-42ef-807f-44a8351e4207",
-      "name": "Aggregate"
+      "id": "a72756d5-03ca-4f1f-818d-aa02ee92d129",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "yRiCA6CZvBhEygpq",
+          "name": "HuggingFaceApi account"
+        }
+      }
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.merge",
-      "typeVersion": 3.2,
+      "parameters": {
+        "operation": "sendAndWait",
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "message": "Напишите интересующий вас вопрос в специальную форму\nВ вопросе укажите: Название книги, главу и том (по желанию и если есть)\nНомера пишите цифрами, чтобы выдавало корректный ответ",
+        "responseType": "freeText",
+        "options": {
+          "messageButtonLabel": "Написать",
+          "responseFormTitle": "",
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [
-        64,
-        544
+        -1712,
+        1424
       ],
-      "id": "8e9e2f7b-5a0d-43e1-8fe2-4b8cdae1b870",
-      "name": "Merge"
+      "id": "f8485370-408b-4e45-ada6-374f17b652cb",
+      "name": "Send message and wait for response",
+      "webhookId": "c7ab7954-b154-4e47-b044-fd215a05058e",
+      "credentials": {
+        "telegramApi": {
+          "id": "CZXftFUVcPFhvuZ8",
+          "name": "Telegram account 2"
+        }
+      }
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.limit",
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "=Это тебе данные из векторной базы данных. В metadata есть значение book которое дает название книги и chapter которое дает главу. в content само содержание. Ты должен на основе этого материала построить ответ. Если требуется какая-то глава - ищи в chapter в metadata\n",
+        "tableName": {
+          "__rl": true,
+          "value": "chunks",
+          "mode": "list",
+          "cachedResultName": "chunks"
+        },
+        "topK": 15,
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "chapter",
+                "value": "={{ $json.filter_chapter }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        -976,
+        1744
+      ],
+      "id": "801d877a-e977-47b1-a434-b3ee30668ec7",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "yZbFdNIlAizR3S9X",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "mixedbread-ai/mxbai-embed-large-v1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
       "typeVersion": 1,
       "position": [
-        208,
-        16
+        -928,
+        1920
       ],
-      "id": "1069db55-c8e8-4ff4-8beb-03513e4e5e08",
-      "name": "Limit"
+      "id": "183694c9-621b-4a13-892c-6819f614be52",
+      "name": "Embeddings HuggingFace Inference1",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "yRiCA6CZvBhEygpq",
+          "name": "HuggingFaceApi account"
+        }
+      }
     },
     {
       "parameters": {
         "fieldsToAggregate": {
           "fieldToAggregate": [
             {
-              "fieldToAggregate": "content"
+              "fieldToAggregate": "title"
             }
           ]
         },
@@ -810,70 +445,142 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        -416,
-        560
+        -1456,
+        1152
       ],
-      "id": "3970ef1f-783b-40c8-b928-a3b4415b97d1",
+      "id": "2ab1b1b4-f3d5-4cd5-b900-398cf2d6e29d",
       "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "Отправлено",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        496
+      ],
+      "id": "c5132b1a-106d-43a0-bd84-89a77ea4ac7f",
+      "name": "Send a text message",
+      "webhookId": "93b9d97d-5c24-4434-8e26-f120e64c784d",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "CZXftFUVcPFhvuZ8",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "09bcf9a2-e156-44bb-9ec1-2897a3d5f160",
+      "name": "Ответ",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -800,
+        1488
+      ],
+      "webhookId": "4a4b1a8b-4995-4363-a094-108d0dec8097",
+      "credentials": {
+        "telegramApi": {
+          "id": "CZXftFUVcPFhvuZ8",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first();\nconst fullText = input.json.text || \"\";\nconst fileName = $('Send message and wait for response2').first().json.data['Загрузите книгу'][0].filename.replace('.txt', '');\n\nfunction romanToArab(roman) {\n  if (!isNaN(roman)) return parseInt(roman);\n  const lookup = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };\n  let arab = 0;\n  let i = roman.toUpperCase().length;\n  while (i--) {\n    if (lookup[roman[i]] < lookup[roman[i + 1]]) {\n      arab -= lookup[roman[i]];\n    } else {\n      arab += lookup[roman[i]];\n    }\n  }\n  return arab;\n}\n\n// Ваша рабочая регулярка для поиска глав\nconst chapterRegex = /(?:\\n|^)(?:Глава\\s+)?([IVXLCDM]+|[0-9]+)(?:\\.|\\s)*(?:\\n|\\r|$)/gi;\n\nconst parts = fullText.split(chapterRegex);\nlet results = [];\n\n// Функция для очистки текста (шлифовка \\n и пробелов)\nfunction cleanText(t) {\n  return t.replace(/[\\r\\n]+/g, '\\n').replace(/[ \\t]+/g, ' ').trim();\n}\n\n// ЕСЛИ ГЛАВЫ НАЙДЕНЫ (parts.length > 1)\nif (parts.length > 1) {\n  for (let i = 1; i < parts.length; i += 2) {\n    const originalChapter = parts[i].trim();\n    const chapterNumber = romanToArab(originalChapter.toUpperCase());\n    let chapterContent = parts[i + 1] ? parts[i + 1] : \"\";\n    \n    chapterContent = cleanText(chapterContent);\n\n    // Фильтр: длина > 150 символов и наличие букв (убираем сноски)\n    if (chapterContent.length > 150 && /[а-яА-Яa-zA-Z]/.test(chapterContent)) {\n      results.push({\n        json: {\n          text: `Глава ${chapterNumber}\\n${chapterContent}`,\n          metadata: { chapter: chapterNumber, book: fileName }\n        }\n      });\n    }\n  }\n}\n\n// ЕСЛИ ГЛАВЫ НЕ НАЙДЕНЫ ИЛИ ВСЕ БЫЛИ ОТСЕЯНЫ КАК МАЛЕНЬКИЕ\nif (results.length === 0) {\n  const polishedText = cleanText(fullText);\n\n  if (polishedText.length > 150 && /[а-яА-Яa-zA-Z]/.test(polishedText)) {\n    results.push({\n      json: {\n        text: polishedText,\n        metadata: { chapter: 1, book: fileName }\n      }\n    });\n  }\n}\n\nreturn results;\n"
+      },
+      "id": "f60b1ab4-93e6-42bd-bf7f-86caa39c5e68",
+      "name": "Нарезать на фрагменты и выделить главы",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Разобрать сообщение1').item.json.chatId }}",
+        "text": "📚 *Умный поиск по книгам*\n\nЯ ищу фрагменты в книгах и отвечаю на вопросы по их содержанию.\n\n*Команды:*\n🔍 /search — найти фрагменты текста\n💬 /ask — задать вопрос по книгам\n📖 /books — список загруженных книг\n\n*Загрузка книги:*\n📄 Отправь .txt файл прямо в чат\n\n*Примеры:*\n`/search первый бал Наташи Ростовой`\n`/ask Почему Раскольников решился на убийство?`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "825ae08e-99a4-41cf-9e56-7d2ddd83a080",
+      "name": "Отправить справку",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1744,
+        608
+      ],
+      "webhookId": "496df682-ca3e-443f-8179-3302ed41490b",
+      "credentials": {
+        "telegramApi": {
+          "id": "CZXftFUVcPFhvuZ8",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "books",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $json.metadata.book }}"
+            }
+          ]
+        }
+      },
+      "id": "4e9c1fc7-b887-4df6-907b-841458f6edaf",
+      "name": "Загрузить в бд книгу",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        512
+      ],
+      "executeOnce": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "yZbFdNIlAizR3S9X",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $json.data?.text || \"\"; // Текст сообщения пользователя\n\n// 1. Ищем главу (Глава 5, Гл. 4, 3 глава, в пятой главе)\nconst chapterMatch = text.match(/(?:глава|гл\\.?|гл|в|главе)\\s*(\\d+|[IVXLCDM]+)|(\\d+|[IVXLCDM]+)\\s*(?:глава|главе|гл\\.?)/i);\n\n// 2. Ищем том (Том 2, Т. 1, 3 том)\nconst volumeMatch = text.match(/(?:том|т\\.?)\\s*(\\d+|[IVXLCDM]+)|(\\d+|[IVXLCDM]+)\\s*(?:том|т\\.?)/i);\n\n// Функция для перевода римских цифр (из нашего прошлого кода)\nfunction romanToArab(roman) {\n  if (!roman) return null;\n  if (!isNaN(roman)) return parseInt(roman);\n  const lookup = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };\n  let arab = 0;\n  let i = roman.toUpperCase().length;\n  while (i--) {\n    if (lookup[roman[i]] < lookup[roman[i + 1]]) {\n      arab -= lookup[roman[i]];\n    } else {\n      arab += lookup[roman[i]];\n    }\n  }\n  return arab;\n}\n\n// Извлекаем чистые числа\nconst chapter = chapterMatch ? romanToArab(chapterMatch[1] || chapterMatch[2]) : null;\nconst volume = volumeMatch ? romanToArab(volumeMatch[1] || volumeMatch[2]) : null;\n\nreturn {\n  query: text,\n  filter_chapter: chapter,\n  filter_volume: volume,\n  has_filter: !!(chapter || volume)\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1488,
+        1472
+      ],
+      "id": "b5a18c98-5101-4503-b6f6-7088901cee31",
+      "name": "Code in JavaScript"
     }
   ],
   "pinData": {},
   "connections": {
-    "Создать запись книги в Supabase": {
-      "main": [
-        [
-          {
-            "node": "Embedding чанка → HF",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embedding чанка → HF": {
-      "main": [
-        [
-          {
-            "node": "Aggregate",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Вставить чанк в Supabase": {
-      "main": [
-        [
-          {
-            "node": "Книга загружена1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Embedding запроса → HF": {
-      "main": [
-        [
-          {
-            "node": "Распаковать эмбеддинг запроса",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Распаковать эмбеддинг запроса": {
-      "main": [
-        [
-          {
-            "node": "Векторный поиск → Supabase RPC1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Telegram Trigger1": {
       "main": [
         [
@@ -889,98 +596,7 @@
       "main": [
         [
           {
-            "node": "Форматировать список книг1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Форматировать список книг1": {
-      "main": [
-        [
-          {
-            "node": "Отправить список книг1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Проверить запрос1": {
-      "main": [
-        [
-          {
-            "node": "Запрос пустой?1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Запрос пустой?1": {
-      "main": [
-        [
-          {
-            "node": "Подсказка по команде1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Сообщение: ищу1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Сообщение: ищу1": {
-      "main": [
-        [
-          {
-            "node": "Embedding запроса → HF",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Векторный поиск → Supabase RPC1": {
-      "main": [
-        [
-          {
-            "node": "Подготовить контекст для AI1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Подготовить контекст для AI1": {
-      "main": [
-        [
-          {
-            "node": "Есть результаты?1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Есть результаты?1": {
-      "main": [
-        [
-          {
-            "node": "Нет результатов1",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "AI Agent1",
+            "node": "Aggregate1",
             "type": "main",
             "index": 0
           }
@@ -991,7 +607,7 @@
       "main": [
         [
           {
-            "node": "Форматировать ответ1",
+            "node": "Ответ",
             "type": "main",
             "index": 0
           }
@@ -1009,22 +625,11 @@
         ]
       ]
     },
-    "Форматировать ответ1": {
-      "main": [
-        [
-          {
-            "node": "Отправить ответ1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Роутер1": {
       "main": [
         [
           {
-            "node": "Отправить справку1",
+            "node": "Отправить справку",
             "type": "main",
             "index": 0
           }
@@ -1045,18 +650,7 @@
         ],
         [
           {
-            "node": "Проверить запрос1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Нарезать на фрагменты2": {
-      "main": [
-        [
-          {
-            "node": "Split Out2",
+            "node": "Send message and wait for response",
             "type": "main",
             "index": 0
           }
@@ -1078,46 +672,63 @@
       "main": [
         [
           {
-            "node": "Нарезать на фрагменты2",
+            "node": "Нарезать на фрагменты и выделить главы",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Split Out2": {
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
       "main": [
         [
           {
-            "node": "Создать запись книги в Supabase",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Aggregate1",
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Aggregate": {
-      "main": [
+    "Supabase Vector Store1": {
+      "ai_tool": [
         [
           {
-            "node": "Merge",
-            "type": "main",
+            "node": "AI Agent1",
+            "type": "ai_tool",
             "index": 0
           }
         ]
       ]
     },
-    "Merge": {
-      "main": [
+    "Embeddings HuggingFace Inference1": {
+      "ai_embedding": [
         [
           {
-            "node": "Вставить чанк в Supabase",
-            "type": "main",
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
             "index": 0
           }
         ]
@@ -1127,9 +738,58 @@
       "main": [
         [
           {
-            "node": "Merge",
+            "node": "Отправить список книг1",
             "type": "main",
-            "index": 1
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Загрузить в бд книгу",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ответ": {
+      "main": [
+        []
+      ]
+    },
+    "Нарезать на фрагменты и выделить главы": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Загрузить в бд книгу": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -1140,8 +800,9 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "86643e22-30eb-4b5f-9b45-0f08b9091bd9",
+  "versionId": "f65f0cbf-3655-40c8-81a8-1e8e5229bcee",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "ef54d6bc21c36c3d24b246e111c5bcc9415a8aeeee932293aeeb5e99a6fc8a9e"
   },
   "id": "IPg4-WIuJkdEY6ySPlQ6L",

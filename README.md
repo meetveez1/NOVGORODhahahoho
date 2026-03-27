@@ -139,7 +139,8 @@ $$;
 
 ## 🧪 Пример работы
 <img width="963" height="886" alt="image" src="https://github.com/user-attachments/assets/fd69ff59-1891-4e23-a32b-2e01f4229360" />
-Книга - Тарас Бульба
+
+#Книга — Тарас Бульба
 
 
 ## 📁 Структура репозитория

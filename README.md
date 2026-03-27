@@ -109,10 +109,9 @@ $$;
 | Название | Тип | Что указать |
 |---|---|---|
 | `Telegram account` | Telegram API | Token от BotFather |
-| `Header Auth account` | HTTP Header Auth | `apikey: <ваш Supabase anon/service key>` |
-| `Bearer Auth account` | HTTP Bearer Auth | HuggingFace API token |
+| `HuggingFaceApi account` | HuggingFaceApi API | HuggingFace API token |
 | `Supabase account` | Supabase | URL и Service Role Key |
-| `API LLM` | OpenRouter API | API ключ из личного кабинета OpenRouter |
+| `OpenRouter account` | OpenRouter API | API ключ из личного кабинета OpenRouter |
 
 ---
 
